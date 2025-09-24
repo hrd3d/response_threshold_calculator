@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Response Threshold Calculator</title>
+  <style>
+    body {
+      background: radial-gradient(circle at top, #38bdf8 0%, #0f172a 100%);
+      background-size: 400% 400%;
+      animation: waveOcean 3s ease-in-out infinite;
+      color: #E0E0E0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    <!-- @keyframes waveOcean {
+      0% { background-position: 0% 0%; }
+      50% { background-position: 100% 100%; }
+      100% { background-position: 0% 0%; }
+    } -->
+
+   @keyframes waveOcean {
+      0%   { background-position: 0% 0%; }
+      25%  { background-position: 100% 0%; }
+      50%  { background-position: 100% 100%; }
+      75%  { background-position: 0% 100%; }
+      100% { background-position: 0% 0%; }
+    }
+
+    .container {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(5px);
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      display: inline-block;
+      white-space: nowrap;
+      max-width: 95vw;
+    }
+
+    <!-- h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #ffffff;
+    } -->
+
+    h1 {
+      font-size: 3rem;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+    }
+
+    input {
+      text-align: center;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 12px;
+      background-color: #374151;
+      color: #ffffff;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: clamp(10px, 1.2vw, 14px);
+      color: #A5F3FC;
+      text-align: left;
+      line-height: 1.5;
+    }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-right: 8px;
+      font-size: 16px;
+      color: #38bdf8;
+    }
+
+    .copy-btn:hover {
+      color: #0ea5e9;
+    }
+
+    #copyMessage {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #22c55e;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 style="font-size:20px;">Response Threshold Calculator</h1>
+    <p>Enter time in format: HH:MM:SS to HH:MM:SS</p>
+    <input type="text" id="timeRange" placeholder="e.g., 10:53:20 to 10:55:43" />
+    <div id="result"></div>
+  </div>
+
+  <div id="copyMessage" style="font-size: 30px;">✅Successfully Copied!</div>
+
+  <script>
+    function parseTimeString(timeStr) {
+      const [h, m, s] = timeStr.split(':').map(Number);
+      return (h * 3600) + (m * 60) + s;
+    }
+
+    function formatTimeDiff(seconds) {
+      if (seconds <= 0) return "0sec";
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      let result = "";
+      if (mins > 0) result += `${mins}min${mins > 1 ? 's' : ''}`;
+      if (secs > 0) result += (mins > 0 ? ' and ' : '') + `${secs}sec${secs > 1 ? 's' : ''}`;
+      return result;
+    }
+
+    function showCopyMessage() {
+      const msg = document.getElementById("copyMessage");
+      msg.style.display = "block";
+      setTimeout(() => { msg.style.display = "none"; }, 2000);
+    }
+
+    function addCopyButtons() {
+      const resultDiv = document.getElementById("result");
+      const paragraphs = resultDiv.querySelectorAll("p");
+
+      paragraphs.forEach(p => {
+        if (!p.querySelector("button")) {
+          const text = p.innerText;
+          const btn = document.createElement("button");
+          btn.innerHTML = "📋";
+          btn.style.fontSize = "25px";
+          btn.className = "copy-btn";
+          btn.onclick = () => {
+            navigator.clipboard.writeText(text).then(() => {
+              showCopyMessage();
+            });
+          };
+          p.prepend(btn); // put button before the sentence
+        }
+      });
+    }
+
+    document.getElementById('timeRange').addEventListener('keydown', function(event) {
+      const inputBox = this;
+      if (event.key === 'Enter') {
+        const input = this.value.trim();
+        const parts = input.split(' to ').map(p => p.trim());
+
+        if (parts.length !== 2 || !/^\d{2}:\d{2}:\d{2}$/.test(parts[0]) || !/^\d{2}:\d{2}:\d{2}$/.test(parts[1])) {
+          document.getElementById('result').innerText = "⚠️Please enter time as: HH:MM:SS to HH:MM:SS";
+          inputBox.classList.add('shake');
+          setTimeout(() => inputBox.classList.remove('shake'), 400);
+          return;
+        }
+
+        const fromSec = parseTimeString(parts[0]);
+        const toSec = parseTimeString(parts[1]);
+        let diff = toSec - fromSec;
+        if (diff < 0) diff += 86400;
+
+        const resultText = formatTimeDiff(diff);
+        const color = diff <= 150 ? "green" : "red";
+        document.getElementById('result').innerHTML = `
+          <div style='margin-bottom: 10px; font-size: 30px; color: ${color}; text-align: center; font-family: arial; font-weight: bold;'>${resultText}</div>
+          <div>
+            <p style="margin-bottom:1px !important; font:size: 12px;">Response threshold/GBE10 - The agent failed the 15-sec response threshold from ${parts[0]} to ${parts[1]} (${resultText}).</p>
+            <p style="margin-bottom:1px !important; font:size: 12px;">Response threshold/GBE10 - The agent failed the 2-min response threshold from ${parts[0]} to ${parts[1]} (${resultText}).</p>
+            <p style="margin-bottom:1px !important; font:size: 12px;">Response threshold/GBE10 - The agent also the 2-min response threshold from ${parts[0]} until chat ended (due user inactivity) on ${parts[1]} (${resultText}).</p>
+            <p style="margin-bottom:50px !important; font:size: 12px;">Response threshold/GBE10 - The agent also the 2-min response threshold from ${parts[0]} until chat ended (due chat ended by user) on ${parts[1]} (${resultText}).</p>
+            <p style="margin-bottom:1px !important; font:size: 12px;">PreEndChat/GBE12 - The agent failed to utilize the PreEndChat button. The agent could've clicked the PreEndChat button after providing the solution.</p>
+            <p style="margin-bottom:1px !important; font:size: 12px;">FAQ Link/SOP05 - The agent failed to provide FAQ Link. The agent could've provided HC link/s as per the corresponding eKB and/or Revamped Codes which is related to the user's concern.</p>
+            <p style="margin-bottom:1px !important; font:size: 12px;">SOPA/SOP31 – The agent failed to utilize SOPA within the interaction. The agent could have utilized SOPA during the interaction to provide accurate information.</p>
+          </div>`;
+        
+        addCopyButtons(); // add buttons each time result is generated
+      }
+    });
+  </script>
+</body>
+</html>
