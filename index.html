@@ -7,24 +7,30 @@
   <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/50/000000/calculator.png">
   <style>
     body {
-      background: radial-gradient(circle at top, #38bdf8 0%, #0f172a 100%);
+      background: radial-gradient(circle at top, #ee4d2d 0%, #ff944d 100%); 
+      /* background: radial-gradient(circle at top, #38bdf8 0%, #0f172a 100%); */ 
       background-size: 400% 400%;
       animation: waveOcean 3s ease-in-out infinite;
       color: #E0E0E0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
+      padding: 0;
     }
 
     @keyframes waveOcean {
-      0%   { background-position: 0% 0%; }
+      <!-- 0%   { background-position: 0% 0%; }
       25%  { background-position: 100% 0%; }
       50%  { background-position: 100% 100%; }
       75%  { background-position: 0% 100%; }
-      100% { background-position: 0% 0%; }
+      100% { background-position: 0% 0%; } -->
+      background-color: #fff4ef; /* very light orange */
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
     .container {
@@ -82,15 +88,16 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: #22c55e; /* default green */
-      color: white;
-      padding: 10px 20px;
+      background-color: #22c55e;
+      color: #fff;
+      padding: 12px 20px;
       border-radius: 8px;
       font-size: 16px;
       opacity: 0;
       transition: opacity 0.5s ease-in-out;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
       z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      margin: 10px;
     }
 
     .notification.show {
@@ -98,14 +105,21 @@
     }
 
     .notification.error {
-      background: #ef4444; /* red */
-      color: white;
+      background-color: #ef4444; /* Bright red */
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
 
     .notification.warning {
-      background: #eab308; /* yellow */
-      color: black;
-      font-weight: bold;
+      background-color: #facc15; /* Vibrant yellow */
+      color: #7a1d0f; /* Dark text for contrast */
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
 
     .shake {
@@ -122,7 +136,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>Response Threshold Calculator</h1>
+    <h1 style="font-size: 36px;">Response Threshold Calculator</h1>
     <p>Enter time in format: HH:MM:SS to HH:MM:SS</p>
     <input type="text" id="timeRange" placeholder="e.g., 10:53:20 to 10:55:43" />
     <div id="result"></div>
@@ -167,8 +181,8 @@
 
       setTimeout(() => {
         note.style.opacity = "0";
-        setTimeout(() => note.classList.remove("show"), 3000);
-      }, 3000);
+        setTimeout(() => note.classList.remove("show"), 5000);
+      }, 5000);
     }
 
     function addCopyButtons() {
@@ -199,7 +213,7 @@
 
         // check duplicate entry
         if (input === lastInput) {
-          showNotification("Notice! Same result found. Enter a new response threshold format.", "warning");
+          showNotification("Noticed! Same result found. Enter a new response threshold format.", "warning");
           return;
         }
 
