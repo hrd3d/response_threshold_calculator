@@ -82,7 +82,7 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: #22c55e;
+      background: #22c55e; /* default green */
       color: white;
       padding: 10px 20px;
       border-radius: 8px;
@@ -98,7 +98,14 @@
     }
 
     .notification.error {
-      background: #ef4444;
+      background: #ef4444; /* red */
+      color: white;
+    }
+
+    .notification.warning {
+      background: #eab308; /* yellow */
+      color: black;
+      font-weight: bold;
     }
 
     .shake {
@@ -125,6 +132,8 @@
   <div id="notification" class="notification"></div>
 
   <script>
+    let lastInput = ""; // store last input
+
     function parseTimeString(timeStr) {
       const [h, m, s] = timeStr.split(':').map(Number);
       return (h * 3600) + (m * 60) + s;
@@ -140,17 +149,25 @@
       return result;
     }
 
-    function showNotification(message, isError = false) {
+    function showNotification(message, type = "success") {
       const note = document.getElementById("notification");
       note.textContent = message;
-      note.classList.toggle("error", isError);
+      note.className = "notification"; // reset
+
+      if (type === "error") {
+        note.classList.add("error");
+      } else if (type === "warning") {
+        note.classList.add("warning");
+      } else {
+        // success stays green
+      }
 
       note.classList.add("show");
       note.style.opacity = "1";
 
       setTimeout(() => {
         note.style.opacity = "0";
-        setTimeout(() => note.classList.remove("show"), 5000); // fully hide after fade-out
+        setTimeout(() => note.classList.remove("show"), 5000);
       }, 3000);
     }
 
@@ -179,13 +196,20 @@
       const inputBox = this;
       if (event.key === 'Enter') {
         const input = this.value.trim();
+
+        // check duplicate entry
+        if (input === lastInput) {
+          showNotification("Noticed! Same result found. Enter a new response threshold format.", "warning");
+          return;
+        }
+
         const parts = input.split(' to ').map(p => p.trim());
 
         if (parts.length !== 2 || !/^\d{2}:\d{2}:\d{2}$/.test(parts[0]) || !/^\d{2}:\d{2}:\d{2}$/.test(parts[1])) {
           document.getElementById('result').innerText = "⚠️Invalid response threshold format!";
           inputBox.classList.add('shake');
           setTimeout(() => inputBox.classList.remove('shake'), 400);
-          showNotification("Failed! Check the correct format (HH:MM:SS to HH:MM:SS).", true);
+          showNotification("Failed! Check the correct format (HH:MM:SS to HH:MM:SS).", "error");
           return;
         }
 
@@ -208,6 +232,7 @@
         
         addCopyButtons();
         showNotification("Success! The response threshold result is now available!");
+        lastInput = input; // update last input
       }
     });
   </script>
