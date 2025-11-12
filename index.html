@@ -1,255 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Response Threshold Calculator (OCR Enhanced)</title>
-<link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/50/000000/calculator.png">
-<style>
-  body {
-    background: radial-gradient(circle at top, #ee4d2d 0%, #ff944d 100%);
-    background-size: 400% 400%;
-    color: #E0E0E0;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-  }
-  .container {
-    background: rgba(17,24,39,0.9);
-    backdrop-filter: blur(6px);
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 0 40px rgba(0,0,0,0.6);
-    text-align: center;
-    width: min(900px,95vw);
-  }
-  h1 {font-size:36px;text-shadow:2px 2px 6px rgba(0,0,0,0.6);}
-  p {font-size:14px;color:#ddd;}
-  .paste-zone {
-    background: rgba(255,140,40,0.15);
-    border: 2px dashed rgba(255,255,255,0.2);
-    border-radius:8px;
-    padding:18px;
-    margin:20px auto;
-    cursor:pointer;
-    transition:0.2s;
-    color:#fff;
-  }
-  .paste-zone:hover,.paste-zone.active {box-shadow:0 0 10px rgba(255,140,40,0.3);}
-  input {
-    text-align:center;
-    width:100%;
-    padding:10px;
-    border-radius:8px;
-    border:none;
-    font-size:15px;
-    background-color:#374151;
-    color:#fff;
-  }
-  #result {margin-top:20px;color:#A5F3FC;text-align:left;line-height:1.5;}
-  #time-diff {margin-top:15px;font-size:28px;font-weight:bold;}
-  .notification {
-    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-    background:#22c55e;color:#fff;padding:12px 20px;border-radius:8px;
-    font-size:15px;opacity:0;transition:opacity .4s;z-index:999;
-  }
-  .notification.show{opacity:1;}
-  .notification.error{background:#ef4444;}
-  .notification.warning{background:#facc15;color:#5b2b00;}
-  /* debug overlay */
-  #debugOverlay {
-    position:fixed;
-    right:10px;
-    bottom:10px;
-    width:350px;
-    height:200px;
-    background:rgba(0,0,0,0.85);
-    color:#aef;
-    font-size:12px;
-    font-family:monospace;
-    overflow:auto;
-    border:1px solid rgba(255,255,255,0.2);
-    border-radius:8px;
-    padding:10px;
-    z-index:2000;
-  }
-  #debugOverlay h3 {
-    margin:0 0 6px;
-    font-size:13px;
-    color:#fca;
-    text-align:center;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Response Threshold Calculator</title>
+  <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/50/000000/calculator.png">
+  <style>
+    body {
+      background: radial-gradient(circle at top, #ee4d2d 0%, #ff944d 100%); 
+      /* background: radial-gradient(circle at top, #38bdf8 0%, #0f172a 100%); */ 
+      background-size: 400% 400%;
+      animation: waveOcean 2s ease-in-out infinite;
+      color: #E0E0E0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    @keyframes waveOcean {
+      <!-- 0%   { background-position: 0% 0%; }
+      25%  { background-position: 100% 0%; }
+      50%  { background-position: 100% 100%; }
+      75%  { background-position: 0% 100%; }
+      100% { background-position: 0% 0%; } -->
+      background-color: #fff4ef; /* very light orange */
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .container {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(5px);
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      display: inline-block;
+      white-space: nowrap;
+      max-width: 95vw;
+    }
+
+    h1 {
+      font-size: 25px;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+    }
+
+    input {
+      text-align: center;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 15px;
+      background-color: #374151;
+      color: #ffffff;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: clamp(10px, 1.2vw, 14px);
+      color: #A5F3FC;
+      text-align: left;
+      line-height: 1.5;
+    }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-right: 8px;
+      font-size: 16px;
+      color: #38bdf8;
+    }
+
+    .copy-btn:hover {
+      color: #0ea5e9;
+    }
+
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #22c55e;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      margin: 10px;
+    }
+
+    .notification.show {
+      opacity: 1;
+    }
+
+    .notification.error {
+      background-color: #ef4444; /* Bright red */
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .notification.warning {
+      background-color: #facc15; /* Vibrant yellow */
+      color: #7a1d0f; /* Dark text for contrast */
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>Response Threshold Calculator</h1>
-    <p>Enter time in format: HH:MM:SS to HH:MM:SS — or paste a snip (Shift+Win+S) into the zone below</p>
-
-    <div id="pasteZone" class="paste-zone" tabindex="0">
-      Click here and paste (Ctrl+V) your snipped timestamps
-    </div>
-
-    <input id="timeRange" type="text" placeholder="e.g., 10:53:20 to 10:55:43" />
-    <div id="time-diff"></div>
+    <h1 style="font-size: 36px;">Response Threshold Calculator</h1>
+    <p>Enter time in format: HH:MM:SS to HH:MM:SS</p>
+    <input type="text" id="timeRange" placeholder="e.g., 10:53:20 to 10:55:43" />
     <div id="result"></div>
   </div>
 
+  <!-- General notification -->
   <div id="notification" class="notification"></div>
 
-  <div id="debugOverlay"><h3>🔍 OCR Debug Output</h3><pre id="ocrOutput">No OCR data yet...</pre></div>
-
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
   <script>
-    const note=document.getElementById('notification');
-    const pasteZone=document.getElementById('pasteZone');
-    const input=document.getElementById('timeRange');
-    const result=document.getElementById('result');
-    const diffBox=document.getElementById('time-diff');
-    const ocrOutput=document.getElementById('ocrOutput');
-    let lastInput="";
+    let lastInput = ""; // store last input
 
-    function showNotification(msg,type="success",time=4000){
-      note.textContent=msg;
-      note.className="notification "+(type==="error"?"error":type==="warning"?"warning":"");
+    function parseTimeString(timeStr) {
+      const [h, m, s] = timeStr.split(':').map(Number);
+      return (h * 3600) + (m * 60) + s;
+    }
+
+    function formatTimeDiff(seconds) {
+      if (seconds <= 0) return "0sec";
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      let result = "";
+      if (mins > 0) result += `${mins}min${mins > 1 ? 's' : ''}`;
+      if (secs > 0) result += (mins > 0 ? ' and ' : '') + `${secs}sec${secs > 1 ? 's' : ''}`;
+      return result;
+    }
+
+    function showNotification(message, type = "success") {
+      const note = document.getElementById("notification");
+      note.textContent = message;
+      note.className = "notification"; // reset
+
+      if (type === "error") {
+        note.classList.add("error");
+      } else if (type === "warning") {
+        note.classList.add("warning");
+      } else {
+        // success stays green
+      }
+
       note.classList.add("show");
-      setTimeout(()=>note.classList.remove("show"),time);
+      note.style.opacity = "1";
+
+      setTimeout(() => {
+        note.style.opacity = "0";
+        setTimeout(() => note.classList.remove("show"), 5000);
+      }, 5000);
     }
 
-    function parseTimeString(t){const[a,b,c]=t.split(':').map(Number);return(a*3600)+(b*60)+c;}
-    function formatDiff(sec){const m=Math.floor(sec/60),s=sec%60;return (m?`${m}min${m>1?'s':''}`:"")+(s?(m?' and ':'')+`${s}sec${s>1?'s':''}`:"");}
+    function addCopyButtons() {
+      const resultDiv = document.getElementById("result");
+      const paragraphs = resultDiv.querySelectorAll("p");
 
-    function compute(val){
-      const parts=val.split(' to ');
-      if(parts.length!==2){showNotification("Invalid format!","error");return;}
-      const f=parseTimeString(parts[0]),t=parseTimeString(parts[1]);
-      let d=t-f;if(d<0)d+=86400;
-      const txt=formatDiff(d);
-      diffBox.innerHTML=`<span style="color:${d<=150?'#22c55e':'#ef4444'}">${txt}</span>`;
-      result.innerHTML=`
-      <p>Response threshold/GBE10 - The agent failed the 15-sec response threshold from ${parts[0]} to ${parts[1]} (${txt}).</p>
-      <p>Response threshold/GBE10 - The agent failed the 2-min response threshold from ${parts[0]} to ${parts[1]} (${txt}).</p>
-      <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to user inactivity) on ${parts[1]} (${txt}).</p>
-      <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to chat ended by user) on ${parts[1]} (${txt}).</p>
-      <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to timeout/agent inactivity) on ${parts[1]} (${txt}).</p>
-      <p>Hold SOP/GBE08 - The agent failed to get back to the user within 2-min response threshold from ${parts[0]} to ${parts[1]} (${txt}) after placing the chat on hold.</p>`;
-      showNotification("Success! Result ready.");
-    }
-
-    function extractTimestampRangeFromText(rawText){
-      if(!rawText)return null;
-      const normalized=rawText.replace(/\r/g,' ').replace(/\n/g,' ').replace(/\s+/g,' ').trim();
-      let re=/(\b\d{1,2}:\d{2}:\d{2}\b)\s*(?:to|-|–|—)\s*(\b\d{1,2}:\d{2}:\d{2}\b)/i;
-      let m=normalized.match(re);
-      if(m){const a=m[1].split(':').map(x=>x.padStart(2,'0')).join(':'),b=m[2].split(':').map(x=>x.padStart(2,'0')).join(':');return`${a} to ${b}`;}
-      const allTimes=normalized.match(/\b\d{1,2}:\d{2}:\d{2}\b/g);
-      if(allTimes&&allTimes.length>=2){const a=allTimes[0].split(':').map(x=>x.padStart(2,'0')).join(':'),b=allTimes[1].split(':').map(x=>x.padStart(2,'0')).join(':');return`${a} to ${b}`;}
-      re=/\b\d{1,2}\s*[A-Za-z]{3,9},?\s*(\d{1,2}:\d{2}:\d{2})\b.*?\b\d{1,2}\s*[A-Za-z]{3,9},?\s*(\d{1,2}:\d{2}:\d{2})\b/i;
-      m=normalized.match(re);
-      if(m){const a=m[1].split(':').map(x=>x.padStart(2,'0')).join(':'),b=m[2].split(':').map(x=>x.padStart(2,'0')).join(':');return`${a} to ${b}`;}
-      return null;
-    }
-
-    async function preprocessImageAndOCR(blob){
-      try{
-        const img=await createImageBitmap(blob);
-        const scale=Math.max(2,Math.ceil(Math.max(800/img.width,800/img.height)));
-        const canvas=document.createElement('canvas');
-        canvas.width=Math.round(img.width*scale);
-        canvas.height=Math.round(img.height*scale);
-        const ctx=canvas.getContext('2d');
-        ctx.drawImage(img,0,0,canvas.width,canvas.height);
-        const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-        const data=imageData.data;
-        const contrast=40;
-        const factor=(259*(contrast+255))/(255*(259-contrast));
-        for(let i=0;i<data.length;i+=4){
-          for(let c=0;c<3;c++){
-            let v=data[i+c];
-            v=factor*(v-128)+128;
-            data[i+c]=Math.max(0,Math.min(255,v));
-          }
+      paragraphs.forEach(p => {
+        if (!p.querySelector("button")) {
+          const text = p.innerText;
+          const btn = document.createElement("button");
+          btn.innerHTML = "📋";
+          btn.style.fontSize = "25px";
+          btn.className = "copy-btn";
+          btn.onclick = () => {
+            navigator.clipboard.writeText(text).then(() => {
+              showNotification("Success!");
+            });
+          };
+          p.prepend(btn);
         }
-        for(let i=0;i<data.length;i+=4){
-          const r=data[i],g=data[i+1],b=data[i+2];
-          const gray=Math.round(0.3*r+0.59*g+0.11*b);
-          data[i]=data[i+1]=data[i+2]=gray;
-        }
-        ctx.putImageData(imageData,0,0);
-        const worker=Tesseract.createWorker({logger:m=>{}});
-        await worker.load();await worker.loadLanguage('eng');await worker.initialize('eng');
-        await worker.setParameters({
-          tessedit_char_whitelist:'0123456789: -/.,APMapmABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-          tessedit_pageseg_mode:Tesseract.PSM.SINGLE_BLOCK,
-        });
-        const {data:{text}}=await worker.recognize(canvas);
-        await worker.terminate();
-        ocrOutput.textContent=text.trim()||"(no text detected)";
-        console.log("OCR text:",text);
-        return text;
-      }catch(e){console.error(e);ocrOutput.textContent="OCR error: "+e;return null;}
+      });
     }
 
-    input.addEventListener("keydown",e=>{
-      if(e.key==="Enter"&&input.value.trim())compute(input.value.trim());
-    });
+    document.getElementById('timeRange').addEventListener('keydown', function(event) {
+      const inputBox = this;
+      if (event.key === 'Enter') {
+        const input = this.value.trim();
 
-    pasteZone.addEventListener("click",()=>{showNotification("Ready to paste your snipped timestamps.","warning");pasteZone.classList.add("active");});
-
-    document.addEventListener("paste",async e=>{
-      const clipItems=(e.clipboardData||e.originalEvent?.clipboardData)?.items;
-      let imgFound=false;
-      for(const item of clipItems){
-        if(item.type.startsWith("image/")){
-          imgFound=true;
-          const blob=item.getAsFile();
-          showNotification("Snipped timestamps uploaded! Running OCR...","success");
-          const text=await preprocessImageAndOCR(blob);
-          const extracted=extractTimestampRangeFromText(text);
-          if(extracted){input.value=extracted;showNotification("Snipped timestamps uploaded! Press Enter to compute.","success");}
-          else showNotification("Ooops! Looks like not a timestamps. Please try again.","error");
+        // check duplicate entry
+        if (input === lastInput) {
+          showNotification("Notice! Same result found. Enter a new response threshold format.", "warning");
           return;
         }
-      }
-      if(!imgFound){
-        const txt=(e.clipboardData||window.clipboardData).getData('Text');
-        const extracted=extractTimestampRangeFromText(txt);
-        if(extracted){input.value=extracted;showNotification("Text timestamps pasted! Press Enter to compute.","success");}
-        else showNotification("Ooops! Looks like not a timestamps. Please try again.","error");
+
+        const parts = input.split(' to ').map(p => p.trim());
+
+        if (parts.length !== 2 || !/^\d{2}:\d{2}:\d{2}$/.test(parts[0]) || !/^\d{2}:\d{2}:\d{2}$/.test(parts[1])) {
+          document.getElementById('result').innerText = "⚠️Invalid response threshold format!";
+          inputBox.classList.add('shake');
+          setTimeout(() => inputBox.classList.remove('shake'), 400);
+          showNotification("Failed! Check the correct format (HH:MM:SS to HH:MM:SS).", "error");
+          return;
+        }
+
+        const fromSec = parseTimeString(parts[0]);
+        const toSec = parseTimeString(parts[1]);
+        let diff = toSec - fromSec;
+        if (diff < 0) diff += 86400;
+
+        const resultText = formatTimeDiff(diff);
+        const color = diff <= 150 ? "green" : "red";
+        document.getElementById('result').innerHTML = `
+          <div style='margin-bottom: 10px; font-size: 30px; color: ${color}; text-align: center; font-family: arial; font-weight: bold;'>${resultText}</div>
+          <div>
+            <p>Response threshold/GBE10 - The agent failed the 15-sec response threshold from ${parts[0]} to ${parts[1]} (${resultText}).</p>
+            <p>Response threshold/GBE10 - The agent failed the 2-min response threshold from ${parts[0]} to ${parts[1]} (${resultText}).</p>
+            <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to user inactivity) on ${parts[1]} (${resultText}).</p>
+            <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to chat ended by user) on ${parts[1]} (${resultText}).</p>
+            <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to timeout/agent inactivity) on ${parts[1]} (${resultText}).</p>
+            <p>Hold SOP/GBE08 - The agent failed to get back to the user within 2-min response threshold from ${parts[0]} to ${parts[1]} (${resultText}) after placing the chat on hold.</p>
+          </div>`;
+        
+        addCopyButtons();
+        showNotification("Success! The response threshold result is now available!");
+        lastInput = input; // update last input
       }
     });
-
-    async function checkClipboardAPI(){
-      if(navigator.clipboard && navigator.clipboard.read){
-        document.addEventListener("keydown",async e=>{
-          if(e.ctrlKey && e.key==="v"){
-            try{
-              const items=await navigator.clipboard.read();
-              let gotImg=false;
-              for(const item of items){
-                for(const type of item.types){
-                  if(type.startsWith("image/")){
-                    gotImg=true;
-                    const blob=await item.getType(type);
-                    showNotification("Snipped timestamps uploaded! Running OCR...","success");
-                    const text=await preprocessImageAndOCR(blob);
-                    const extracted=extractTimestampRangeFromText(text);
-                    if(extracted){input.value=extracted;showNotification("Snipped timestamps uploaded! Press Enter to compute.","success");}
-                    else showNotification("Ooops! Looks like not a timestamps. Please try again.","error");
-                    return;
-                  }
-                }
-              }
-              if(!gotImg)showNotification("Ooops! Looks like not a timestamps. Please try again.","error");
-            }catch(err){console.warn(err);}
-          }
-        });
-      }
-    }
-    checkClipboardAPI();
   </script>
 </body>
 </html>
