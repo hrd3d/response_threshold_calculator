@@ -1,568 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Response Threshold Calculator — OpenCV + Tesseract (calc05-final)</title>
-<link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/50/000000/calculator.png">
-<style>
-  html,body{height:100%;margin:0}
-  body{
-    background: radial-gradient(circle at top, #ee4d2d 0%, #ff944d 100%);
-    color:#E0E0E0;font-family:Arial,Helvetica,sans-serif;
-    display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Response Threshold Calculator</title>
+  <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/50/000000/calculator.png">
+  <style>
+    body {
+      background: radial-gradient(circle at top, #ee4d2d 0%, #ff944d 100%); 
+      /* background: radial-gradient(circle at top, #38bdf8 0%, #0f172a 100%); */ 
+      background-size: 400% 400%;
+      animation: waveOcean 2s ease-in-out infinite;
+      color: #E0E0E0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
 
-  /* Container */
-  .container{
-    background:rgba(17,24,39,0.92);backdrop-filter:blur(5px);
-    padding:34px 48px;border-radius:18px;box-shadow:0 18px 30px rgba(0,0,0,0.45);
-    width:auto; text-align:center; display:inline-block; margin:0 auto; max-width:none;
-  }
-  h1{margin:0 0 8px;font-size:36px;text-shadow:2px 2px 6px rgba(0,0,0,0.6)}
-  p.sub{margin:6px 0 16px;color:#D1D5DB;font-size:14px}
+    @keyframes waveOcean {
+      <!-- 0%   { background-position: 0% 0%; }
+      25%  { background-position: 100% 0%; }
+      50%  { background-position: 100% 100%; }
+      75%  { background-position: 0% 100%; }
+      100% { background-position: 0% 0%; } -->
+      background-color: #fff4ef; /* very light orange */
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
 
-  /* Paste zone */
-  .paste-zone{
-    background:linear-gradient(180deg, rgba(255,153,51,0.16), rgba(255,120,30,0.06));
-    border:2px dashed rgba(255,255,255,0.06);
-    border-radius:8px;padding:18px;margin:0 auto 12px;color:#FFF3E0;
-    display:flex;align-items:center;justify-content:center;gap:12px;cursor:text;position:relative;
-    /* animation properties */
-    transition: opacity .35s ease, transform .35s ease, height .35s ease, margin .35s ease;
-    opacity:1; transform:translateY(0);
-  }
-  .paste-zone.hidden{
-    opacity:0; transform:translateY(-10px); height:0; margin:0; padding:0 18px; overflow:hidden; pointer-events:none;
-  }
-  .paste-placeholder { font-size:14px; color:#FFEFD6; }
+    .container {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(5px);
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      display: inline-block;
+      white-space: nowrap;
+      max-width: 95vw;
+    }
 
-  /* Mode switch below paste zone */
-  #modeSwitchRow { margin-top:8px; display:flex; justify-content:center; }
-  #modeSwitchBtn {
-    background:#222; color:#ffd7b2; border:1px solid rgba(255,140,40,0.12);
-    padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px;
-    box-shadow:0 6px 16px rgba(0,0,0,0.35);
-    transition: transform .14s ease;
-  }
-  #modeSwitchBtn:active{ transform:translateY(1px) }
+    h1 {
+      font-size: 25px;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+    }
 
-  /* Input & results */
-  #timeRange{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);
-             background:#374151;color:#fff;font-size:15px;text-align:center;box-sizing:border-box;margin-top:10px;}
-  #time-diff{margin-top:20px;font-size:30px;font-weight:700;color:red;text-align:center}
-  #result{margin-top:20px;font-size:14px;color:#A5F3FC;text-align:left;line-height:1.5; white-space:nowrap; display:inline-block;}
-  #result p{ white-space:nowrap; margin:4px 0; display:block; }
+    input {
+      text-align: center;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 15px;
+      background-color: #374151;
+      color: #ffffff;
+    }
 
-  /* notifications */
-  .notification{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;
-                padding:12px 20px;border-radius:8px;font-size:15px;opacity:0;transition:opacity .28s;z-index:2000}
-  .notification.show{opacity:1}.notification.error{background:#ef4444}.notification.warning{background:#facc15;color:#5b2b00}
+    #result {
+      margin-top: 20px;
+      font-size: clamp(10px, 1.2vw, 14px);
+      color: #A5F3FC;
+      text-align: left;
+      line-height: 1.5;
+    }
 
-  /* debug overlay - compact version */
-  #debugOverlay {
-    position: fixed;
-    right: 10px;
-    bottom: 10px;
-    width: 320px;
-    height: 180px;
-    background: rgba(0, 0, 0, 0.92);
-    color: #aef;
-    font-size: 11px;
-    font-family: monospace;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 6px;
-    padding: 8px;
-    z-index: 3000;
-    transition: opacity .35s ease, transform .35s ease;
-    opacity:1; transform:translateY(0);
-  }
-  #debugOverlay.hidden { opacity:0; transform:translateY(8px); pointer-events:none; }
-  #debugOverlay h3 { margin:0 0 6px; font-size:12px; color:#fca; text-align:center; }
-  #ocrOutput{ white-space:pre-wrap; word-break:break-word; margin:0; padding-bottom:4px; max-height:64px; overflow:auto; font-size:11px }
-  #processedPreview{ display:block; margin-top:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.06); width:100%; height:64px; object-fit:contain; background:#111; }
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-right: 8px;
+      font-size: 16px;
+      color: #38bdf8;
+    }
 
-  .debug-row{ display:flex; gap:6px; align-items:center; justify-content:space-between; margin-top:6px; }
-  .debug-smallbtn{ background:#222; color:#aef; border:1px solid rgba(255,255,255,0.06); padding:6px 8px; border-radius:6px; cursor:pointer; font-size:12px; }
+    .copy-btn:hover {
+      color: #0ea5e9;
+    }
 
-  /* floating debug toggle (fades) */
-  #floatingDebugToggle {
-    position: fixed;
-    bottom: 12px;
-    right: 12px;
-    background: #222;
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #aef;
-    font-size: 18px;
-    padding: 6px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    z-index: 5000;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    transition: opacity .35s ease, transform .35s ease;
-    opacity:1; transform:translateY(0);
-  }
-  #floatingDebugToggle.hidden { opacity:0; transform:translateY(8px); pointer-events:none; }
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #22c55e;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      margin: 10px;
+    }
 
-  /* mode label fade */
-  .modeLabel { margin-top:10px; color:#bcd; font-size:13px; transition: opacity .35s ease; display:block; }
+    .notification.show {
+      opacity: 1;
+    }
 
-  /* copy button style for result lines */
-  .copy-btn { background:none; border:none; cursor:pointer; margin-right:8px; font-size:18px; color:#38bdf8; }
+    .notification.error {
+      background-color: #ef4444; /* Bright red */
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
 
-  /* small accessible focus styles */
-  #modeSwitchBtn:focus, #timeRange:focus, #floatingDebugToggle:focus{ outline:2px solid rgba(255,255,255,0.06); outline-offset:2px; }
+    .notification.warning {
+      background-color: #facc15; /* Vibrant yellow */
+      color: #7a1d0f; /* Dark text for contrast */
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
 
-  /* shake (error) */
-  .shake { animation: shake .4s ease-in-out; }
-  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-6px)} }
-</style>
+    .shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+    }
+  </style>
 </head>
 <body>
-  <div class="container" role="main" aria-labelledby="title">
-    <h1 id="title">Response Threshold Calculator</h1>
-    <p class="sub">Enter time in format: HH:MM:SS to HH:MM:SS — or paste a snip (Shift+Win+S) into the paste zone (Snip Mode)</p>
-    <p class="sub">Note: Browser zoom for Shopee In-House Tool should be set to 90%.</p>
-
-    <div id="pasteZone" class="paste-zone" tabindex="0" title="Click here then press Ctrl+V to paste your snip">
-      <div class="paste-placeholder">Click here and paste (Ctrl+V) your snipped timestamps</div>
-    </div>
-
-    <div id="modeSwitchRow">
-      <button id="modeSwitchBtn" aria-pressed="false">Switch to Manual Mode</button>
-    </div>
-
-    <input id="timeRange" type="text" placeholder="e.g., 10:53:20 to 10:55:43" />
-    <div id="time-diff" aria-live="polite"></div>
-    <div id="result" aria-live="polite"></div>
-
-    <span id="modeLabel" class="modeLabel">📸 Snip Mode (image OCR enabled)</span>
+  <div class="container">
+    <h1 style="font-size: 36px;">Response Threshold Calculator</h1>
+    <p>Enter time in format: HH:MM:SS to HH:MM:SS</p>
+    <input type="text" id="timeRange" placeholder="e.g., 10:53:20 to 10:55:43" />
+    <div id="result"></div>
   </div>
 
-  <div id="notification" class="notification" role="status" aria-live="polite"></div>
+  <!-- General notification -->
+  <div id="notification" class="notification"></div>
 
-  <!-- Debug overlay -->
-  <div id="debugOverlay" role="region" aria-label="OCR debug">
-    <h3>🔍 OCR Debug Output (Internal)</h3>
-    <pre id="ocrOutput">No OCR data yet...</pre>
-    <img id="processedPreview" alt="Processed preview (grayscale/threshold)"/>
-    <div class="debug-row">
-      <div style="color:#cfe; font-size:12px">Processed preview shows what OCR sees</div>
-      <div>
-        <button id="copyOCR" class="debug-smallbtn">Copy OCR</button>
-        <button id="clearOCR" class="debug-smallbtn">Clear</button>
-      </div>
-    </div>
-  </div>
+  <script>
+    let lastInput = ""; // store last input
 
-  <!-- OpenCV and Tesseract -->
-  <script async src="https://docs.opencv.org/4.x/opencv.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
-
-<script>
-/* calc05-final single-file HTML
-   - Dual modes: Snip (default) and Manual
-   - Paste zone + OCR active only in Snip
-   - Smooth fade/collapse animation for paste zone and floating debug toggle
-   - Mode label updates with fade
-   - Fast hybrid OpenCV preprocess + Tesseract worker OCR
-*/
-
-const pasteZone = document.getElementById('pasteZone');
-const timeRangeInput = document.getElementById('timeRange');
-const notification = document.getElementById('notification');
-const resultDiv = document.getElementById('result');
-const timeDiffEl = document.getElementById('time-diff');
-const ocrOutput = document.getElementById('ocrOutput');
-const processedPreview = document.getElementById('processedPreview');
-const copyOCRBtn = document.getElementById('copyOCR');
-const clearOCRBtn = document.getElementById('clearOCR');
-const modeSwitchBtn = document.getElementById('modeSwitchBtn');
-const modeLabel = document.getElementById('modeLabel');
-const debugOverlay = document.getElementById('debugOverlay');
-
-let lastInput = "";
-let cvReady = false;
-let currentMode = 'snip'; // default
-let debugVisible = true;
-
-// create floating debug toggle (always appended; visibility controlled by class)
-const floatingDebugToggle = document.createElement('button');
-floatingDebugToggle.id = 'floatingDebugToggle';
-floatingDebugToggle.innerHTML = '🔍';
-floatingDebugToggle.title = 'Toggle OCR Debug';
-Object.assign(floatingDebugToggle.style, {
-  position:'fixed', bottom:'12px', right:'12px', background:'#222', border:'1px solid rgba(255,255,255,0.15)',
-  color:'#aef', fontSize:'18px', padding:'6px 10px', borderRadius:'6px', cursor:'pointer', zIndex:'5000', boxShadow:'0 2px 6px rgba(0,0,0,0.3)'
-});
-document.body.appendChild(floatingDebugToggle);
-
-// notification helper
-function showNotification(message, type='success', duration=3500){
-  notification.textContent = message;
-  notification.className = 'notification';
-  if (type === 'error') notification.classList.add('error');
-  else if (type === 'warning') notification.classList.add('warning');
-  notification.classList.add('show');
-  clearTimeout(notification._timer);
-  notification._timer = setTimeout(()=>notification.classList.remove('show'), duration);
-}
-
-// time helpers
-function parseTimeStringToSec(timeStr){
-  const parts = timeStr.split(':').map(Number);
-  if (parts.length !== 3 || parts.some(isNaN)) return null;
-  const [h,m,s] = parts;
-  if (h<0||h>23||m<0||m>59||s<0||s>59) return null;
-  return (h*3600)+(m*60)+s;
-}
-function formatTimeDiff(seconds){
-  if(seconds<=0) return "0sec";
-  const mins=Math.floor(seconds/60), secs=seconds%60;
-  let r='';
-  if(mins>0) r+=`${mins}min${mins>1?'s':''}`;
-  if(secs>0) r+=(mins>0?' and ':'')+`${secs}sec${secs>1?'s':''}`;
-  return r;
-}
-function addCopyButtonsToResults(){
-  const paragraphs = resultDiv.querySelectorAll("p");
-  paragraphs.forEach(p => {
-    if (!p.querySelector("button")) {
-      const text = p.innerText;
-      const btn = document.createElement("button");
-      btn.innerHTML = "📋";
-      btn.style.fontSize = "20px";
-      btn.className = "copy-btn";
-      btn.onclick = () => { navigator.clipboard.writeText(text).then(()=> showNotification("Copied!")); };
-      p.prepend(btn);
-    }
-  });
-}
-
-function computeAndRender(rangeText){
-  rangeText = rangeText.trim();
-  if (rangeText === lastInput){ showNotification("Notice! Same result found. Enter a new response threshold format.","warning"); return; }
-  const parts = rangeText.split(/\s+to\s+/i).map(p=>p.trim());
-  if (parts.length !== 2 || !/^\d{2}:\d{2}:\d{2}$/.test(parts[0]) || !/^\d{2}:\d{2}:\d{2}$/.test(parts[1])){
-    resultDiv.innerText = "⚠️Invalid response threshold format!";
-    timeRangeInput.classList.add('shake'); setTimeout(()=>timeRangeInput.classList.remove('shake'),400);
-    showNotification("Failed! Check the correct format (HH:MM:SS to HH:MM:SS).","error");
-    return;
-  }
-  const fromSec = parseTimeStringToSec(parts[0]);
-  const toSec = parseTimeStringToSec(parts[1]);
-  if (fromSec===null||toSec===null){ showNotification("Failed! Invalid time values.","error"); return; }
-  let diff = toSec - fromSec; if (diff<0) diff += 86400;
-  const resultText = formatTimeDiff(diff);
-  const color = diff <= 150 ? "green" : "red";
-  timeDiffEl.innerHTML = `<span style="color:${color}; font-weight:700; font-size:40px;">${resultText}</span>`;
-  resultDiv.innerHTML = `
-    <div style='margin-top:15px; text-align:left;'>
-      <p>Response threshold/GBE10 - The agent failed the 15-sec response threshold from ${parts[0]} to ${parts[1]} (${resultText}).</p>
-      <p>Response threshold/GBE10 - The agent failed the 2-min response threshold from ${parts[0]} to ${parts[1]} (${resultText}).</p>
-      <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to user inactivity) on ${parts[1]} (${resultText}).</p>
-      <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to chat ended by user) on ${parts[1]} (${resultText}).</p>
-      <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to timeout/agent inactivity) on ${parts[1]} (${resultText}).</p>
-      <p>Hold SOP/GBE08 - The agent failed to get back to the user within 2-min response threshold from ${parts[0]} to ${parts[1]} (${resultText}) after placing the chat on hold.</p>
-    </div>`;
-  addCopyButtonsToResults();
-  showNotification("Success! The response threshold result is now available!");
-  lastInput = rangeText;
-}
-
-// timestamp extraction helper
-function extractTimestampRangeFromText(rawText){
-  if(!rawText) return null;
-  const normalized = rawText.replace(/\r/g,' ').replace(/\n/g,' ').replace(/\s+/g,' ').trim();
-  let re = /(\b\d{1,2}:\d{2}:\d{2}\b)\s*(?:to|-|–|—)\s*(\b\d{1,2}:\d{2}:\d{2}\b)/i;
-  let m = normalized.match(re);
-  if (m) {
-    const a = m[1].split(':').map(x=>x.padStart(2,'0')).join(':');
-    const b = m[2].split(':').map(x=>x.padStart(2,'0')).join(':');
-    return `${a} to ${b}`;
-  }
-  const allTimes = normalized.match(/\b\d{1,2}:\d{2}:\d{2}\b/g);
-  if (allTimes && allTimes.length >= 2) {
-    const a = allTimes[0].split(':').map(x=>x.padStart(2,'0')).join(':');
-    const b = allTimes[1].split(':').map(x=>x.padStart(2,'0')).join(':');
-    return `${a} to ${b}`;
-  }
-  // date+time pair fallback
-  re = /\b\d{1,2}\s*[A-Za-z]{3,9},?\s*(\d{1,2}:\d{2}:\d{2})\b.*?\b\d{1,2}\s*[A-Za-z]{3,9},?\s*(\d{1,2}:\d{2}:\d{2})\b/i;
-  m = normalized.match(re);
-  if (m) {
-    const a = m[1].split(':').map(x=>x.padStart(2,'0')).join(':');
-    const b = m[2].split(':').map(x=>x.padStart(2,'0')).join(':');
-    return `${a} to ${b}`;
-  }
-  return null;
-}
-
-// OpenCV readiness
-function onOpenCvReady(){ cvReady = true; console.log('OpenCV ready'); }
-if (typeof cv !== 'undefined') {
-  if (cv['onRuntimeInitialized']) cv['onRuntimeInitialized'] = onOpenCvReady;
-  else onOpenCvReady();
-}
-
-// Fast hybrid preprocess (from calc04)
-async function preprocessWithOpenCV(blob) {
-  try {
-    const imgBitmap = await createImageBitmap(blob);
-    const minDim = Math.min(imgBitmap.width, imgBitmap.height);
-    let scale = minDim < 600 ? 2.5 : 1.5;
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.round(imgBitmap.width * scale);
-    canvas.height = Math.round(imgBitmap.height * scale);
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(imgBitmap, 0, 0, canvas.width, canvas.height);
-
-    if (!cvReady) await new Promise(res => {
-      const t0 = Date.now();
-      (function wait(){ if (typeof cv !== 'undefined' && cvReady) return res(); if (Date.now()-t0>8000) return res(); setTimeout(wait,120); })();
-    });
-
-    if (typeof cv === 'undefined') {
-      processedPreview.src = canvas.toDataURL();
-      return canvas;
+    function parseTimeString(timeStr) {
+      const [h, m, s] = timeStr.split(':').map(Number);
+      return (h * 3600) + (m * 60) + s;
     }
 
-    const src = cv.imread(canvas);
-    let gray = new cv.Mat();
-    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+    function formatTimeDiff(seconds) {
+      if (seconds <= 0) return "0sec";
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      let result = "";
+      if (mins > 0) result += `${mins}min${mins > 1 ? 's' : ''}`;
+      if (secs > 0) result += (mins > 0 ? ' and ' : '') + `${secs}sec${secs > 1 ? 's' : ''}`;
+      return result;
+    }
 
-    // simple binary threshold (faster)
-    let thresh = new cv.Mat();
-    cv.threshold(gray, thresh, 120, 255, cv.THRESH_BINARY_INV);
+    function showNotification(message, type = "success") {
+      const note = document.getElementById("notification");
+      note.textContent = message;
+      note.className = "notification"; // reset
 
-    // light dilation
-    let M = cv.Mat.ones(2,2,cv.CV_8U);
-    cv.dilate(thresh, thresh, M);
+      if (type === "error") {
+        note.classList.add("error");
+      } else if (type === "warning") {
+        note.classList.add("warning");
+      } else {
+        // success stays green
+      }
 
-    let rgba = new cv.Mat();
-    cv.cvtColor(thresh, rgba, cv.COLOR_GRAY2RGBA, 0);
-    cv.imshow(canvas, rgba);
-    processedPreview.src = canvas.toDataURL();
+      note.classList.add("show");
+      note.style.opacity = "1";
 
-    src.delete(); gray.delete(); thresh.delete(); M.delete(); rgba.delete();
-    return canvas;
-  } catch (err) {
-    console.error('preprocessWithOpenCV (fast) error:', err);
-    return null;
-  }
-}
+      setTimeout(() => {
+        note.style.opacity = "0";
+        setTimeout(() => note.classList.remove("show"), 5000);
+      }, 5000);
+    }
 
-// OCR (fast mode) using Tesseract in worker
-async function runOCROnProcessedCanvas(canvas) {
-  try {
-    ocrOutput.textContent = "Running OCR (fast mode)...";
-    const opts = { logger: m => {}, tessedit_char_whitelist: '0123456789:APMto ' };
-    const res = await Tesseract.recognize(canvas, 'eng', {
-      ...opts,
-      workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/worker.min.js',
-      corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@4.0.2/tesseract-core.wasm.js',
-      langPath: 'https://tessdata.projectnaptha.com/4.0.0_best',
-    });
-    const text = res && res.data && res.data.text ? res.data.text : '';
-    ocrOutput.textContent = text.trim() || "(no text detected)";
-    return text;
-  } catch (err) {
-    console.error('Tesseract error:', err);
-    ocrOutput.textContent = "OCR error: " + (err && err.message ? err.message : String(err));
-    return null;
-  }
-}
+    function addCopyButtons() {
+      const resultDiv = document.getElementById("result");
+      const paragraphs = resultDiv.querySelectorAll("p");
 
-// Full pipeline
-async function processImageBlobForTimestamps(blob) {
-  try {
-    showNotification("Snipped timestamps uploaded: preprocessing...", "success", 1400);
-    const processedCanvas = await preprocessWithOpenCV(blob);
-    if (!processedCanvas) { showNotification("Image preprocessing failed. See debug.", "error"); return null; }
-    showNotification("Running OCR...", "success", 1200);
-    const rawText = await runOCROnProcessedCanvas(processedCanvas);
-    const extracted = extractTimestampRangeFromText(rawText);
-    return { rawText, extracted };
-  } catch (err) {
-    console.error('processImageBlobForTimestamps error', err);
-    showNotification("OCR pipeline failed. See console.", "error");
-    return null;
-  }
-}
+      paragraphs.forEach(p => {
+        if (!p.querySelector("button")) {
+          const text = p.innerText;
+          const btn = document.createElement("button");
+          btn.innerHTML = "📋";
+          btn.style.fontSize = "25px";
+          btn.className = "copy-btn";
+          btn.onclick = () => {
+            navigator.clipboard.writeText(text).then(() => {
+              showNotification("Success!");
+            });
+          };
+          p.prepend(btn);
+        }
+      });
+    }
 
-// Paste zone click focus behaviour
-pasteZone.addEventListener('click', ()=>{ if (currentMode === 'snip') { showNotification("Ready to paste your snip.", "warning"); pasteZone.classList.add('hover'); timeRangeInput.focus(); }});
+    document.getElementById('timeRange').addEventListener('keydown', function(event) {
+      const inputBox = this;
+      if (event.key === 'Enter') {
+        const input = this.value.trim();
 
-// Handle paste event with mode-awareness
-document.addEventListener('paste', async (e) => {
-  try {
-    // do not preventDefault globally; only intercept image file pastes in Snip Mode
-    const items = (e.clipboardData || e.originalEvent?.clipboardData)?.items || [];
-    let foundImage = false;
-    let collectedText = "";
-    for (const it of items) {
-      if (it.kind === 'file' && it.type.startsWith('image/')) {
-        foundImage = true;
-        if (currentMode !== 'snip') {
-          // let normal paste occur in Manual Mode (do not prevent)
-          showNotification("Image paste ignored — Manual Mode active.", "warning");
+        // check duplicate entry
+        if (input === lastInput) {
+          showNotification("Notice! Same result found. Enter a new response threshold format.", "warning");
           return;
         }
-        e.preventDefault(); // Consume only in snip mode
-        const blob = it.getAsFile();
-        const { rawText, extracted } = await processImageBlobForTimestamps(blob) || {};
-        if (extracted) {
-          timeRangeInput.value = extracted;
-          showNotification("Snipped timestamps uploaded! Press Enter to compute.", "success");
-        } else {
-          showNotification("Ooops! Looks like not a timestamps. See debug output.", "error");
+
+        const parts = input.split(' to ').map(p => p.trim());
+
+        if (parts.length !== 2 || !/^\d{2}:\d{2}:\d{2}$/.test(parts[0]) || !/^\d{2}:\d{2}:\d{2}$/.test(parts[1])) {
+          document.getElementById('result').innerText = "⚠️Invalid response threshold format!";
+          inputBox.classList.add('shake');
+          setTimeout(() => inputBox.classList.remove('shake'), 400);
+          showNotification("Failed! Check the correct format (HH:MM:SS to HH:MM:SS).", "error");
+          return;
         }
-        return;
-      } else if (it.kind === 'string') {
-        it.getAsString(s => collectedText += s);
+
+        const fromSec = parseTimeString(parts[0]);
+        const toSec = parseTimeString(parts[1]);
+        let diff = toSec - fromSec;
+        if (diff < 0) diff += 86400;
+
+        const resultText = formatTimeDiff(diff);
+        const color = diff <= 150 ? "green" : "red";
+        document.getElementById('result').innerHTML = `
+          <div style='margin-bottom: 10px; font-size: 30px; color: ${color}; text-align: center; font-family: arial; font-weight: bold;'>${resultText}</div>
+          <div>
+            <p>Response threshold/GBE10 - The agent failed the 15-sec response threshold from ${parts[0]} to ${parts[1]} (${resultText}).</p>
+            <p>Response threshold/GBE10 - The agent failed the 2-min response threshold from ${parts[0]} to ${parts[1]} (${resultText}).</p>
+            <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to user inactivity) on ${parts[1]} (${resultText}).</p>
+            <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to chat ended by user) on ${parts[1]} (${resultText}).</p>
+            <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to timeout/agent inactivity) on ${parts[1]} (${resultText}).</p>
+            <p>Hold SOP/GBE08 - The agent failed to get back to the user within 2-min response threshold from ${parts[0]} to ${parts[1]} (${resultText}) after placing the chat on hold.</p>
+          </div>`;
+        
+        addCopyButtons();
+        showNotification("Success! The response threshold result is now available!");
+        lastInput = input; // update last input
       }
-    }
-
-    // if text-only paste
-    setTimeout(() => {
-      if (!foundImage && collectedText) {
-        // In Manual Mode: paste text into input (do not block default)
-        if (currentMode === 'manual') {
-          // Allow default paste to populate the input; if extractable, auto-fill nicely
-          const extracted = extractTimestampRangeFromText(collectedText);
-          if (extracted) {
-            timeRangeInput.value = extracted;
-            showNotification("Text timestamps pasted! Press Enter to compute.", "success");
-          } else {
-            // do nothing special; let default paste work (we didn't preventDefault)
-            showNotification("Text pasted into input (Manual Mode). Press Enter to compute or edit.", "success");
-          }
-        } else {
-          // Snip Mode and text pasted — attempt auto-detect or ignore
-          const extracted = extractTimestampRangeFromText(collectedText);
-          if (extracted) {
-            timeRangeInput.value = extracted;
-            showNotification("Text timestamps detected! Press Enter to compute.", "success");
-          } else {
-            showNotification("Text paste ignored in Snip Mode. Switch to Manual Mode to paste raw text.", "warning");
-          }
-        }
-      }
-    }, 80);
-
-  } catch (err) {
-    console.error('paste handler error', err);
-    showNotification("Paste handling error. See console.", "error");
-  }
-});
-
-// Secure clipboard read via navigator.clipboard.read (image handling) - only active in Snip Mode
-async function setupSecureClipboardRead() {
-  if (!navigator.clipboard || !navigator.clipboard.read) return;
-  document.addEventListener('keydown', async (e) => {
-    if (e.ctrlKey && (e.key === 'v' || e.key === 'V')) {
-      // attempt secure read for images only when in Snip Mode
-      if (currentMode !== 'snip') return; // do nothing in Manual Mode
-      try {
-        const items = await navigator.clipboard.read();
-        for (const item of items) {
-          for (const type of item.types) {
-            if (type.startsWith('image/')) {
-              const blob = await item.getType(type);
-              const result = await processImageBlobForTimestamps(blob);
-              if (result && result.extracted) {
-                timeRangeInput.value = result.extracted;
-                showNotification("Snipped timestamps uploaded! Press Enter to compute.", "success");
-              } else {
-                showNotification("Ooops! Looks like not a timestamps. See debug output.", "error");
-              }
-              return;
-            }
-          }
-        }
-      } catch (err) {
-        // fallback: no-op; user can still use plain paste event
-        console.warn('clipboard.read error', err);
-      }
-    }
-  });
-}
-setupSecureClipboardRead();
-
-// Enter to compute
-timeRangeInput.addEventListener('keydown', (ev) => {
-  if (ev.key === 'Enter') {
-    const v = timeRangeInput.value.trim();
-    if (!v) { showNotification("No timestamps found. Paste or type a valid range first.", "warning"); return; }
-    computeAndRender(v);
-  }
-});
-
-// debug overlay controls
-copyOCRBtn.addEventListener('click', async ()=>{ const t = ocrOutput.textContent || ''; if (!t) return; try { await navigator.clipboard.writeText(t); showNotification('OCR text copied to clipboard'); } catch(e){ showNotification('Copy failed','error'); }});
-clearOCRBtn.addEventListener('click', ()=>{ ocrOutput.textContent = "No OCR data yet..."; processedPreview.src=''; });
-
-// floating debug toggle
-floatingDebugToggle.addEventListener('click', ()=> {
-  debugVisible = !debugVisible;
-  if (debugVisible) {
-    debugOverlay.classList.remove('hidden');
-    floatingDebugToggle.innerHTML = '🔍';
-  } else {
-    debugOverlay.classList.add('hidden');
-    floatingDebugToggle.innerHTML = '🟦';
-  }
-});
-
-// Mode switching: fade/collapse paste zone and floating debug toggle; update label with fade
-function setMode(mode) {
-  currentMode = mode;
-  // paste zone transition
-  if (mode === 'manual') {
-    pasteZone.classList.add('hidden');
-    // fade out floating debug toggle & debug overlay
-    floatingDebugToggle.classList.add('hidden');
-    debugOverlay.classList.add('hidden');
-    // update button text
-    modeSwitchBtn.textContent = 'Switch to Snip Mode';
-    modeSwitchBtn.setAttribute('aria-pressed','true');
-    fadeModeLabel('🖋 Manual Mode (text enabled)');
-  } else {
-    // snip
-    pasteZone.classList.remove('hidden');
-    floatingDebugToggle.classList.remove('hidden');
-    // show debug overlay if debugVisible true
-    if (debugVisible) debugOverlay.classList.remove('hidden');
-    modeSwitchBtn.textContent = 'Switch to Manual Mode';
-    modeSwitchBtn.setAttribute('aria-pressed','false');
-    fadeModeLabel('📸 Snip Mode (image OCR enabled)');
-  }
-}
-
-// animate label text change with fade
-function fadeModeLabel(newText) {
-  modeLabel.style.opacity = 0;
-  setTimeout(()=> {
-    modeLabel.textContent = newText;
-    modeLabel.style.opacity = 1;
-  }, 360);
-}
-
-// toggle via button
-modeSwitchBtn.addEventListener('click', ()=> {
-  const newMode = currentMode === 'snip' ? 'manual' : 'snip';
-  setMode(newMode);
-  showNotification(newMode === 'snip' ? '📸 Snip Mode enabled — paste screenshot for OCR.' : '🖋 Manual Mode enabled — paste or type timestamps directly.');
-});
-
-// initialize UI
-setMode(currentMode);
-
-// Helpful console message
-console.log('calc05-final loaded. Default: Snip Mode. Use mode button below paste zone to switch.');
-
-/* End of script */
-</script>
+    });
+  </script>
 </body>
 </html>
