@@ -6,28 +6,20 @@
   <title>Response Threshold Calculator</title>
   <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/50/000000/calculator.png">
   <style>
-    body {
-      background: radial-gradient(circle at top, #ee4d2d 0%, #ff944d 100%); 
-      /* background: radial-gradient(circle at top, #38bdf8 0%, #0f172a 100%); */ 
-      background-size: 400% 400%;
-      animation: waveOcean 2s ease-in-out infinite;
-      color: #E0E0E0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      padding: 0;
-    }
+body {
+  background: url("christmas.png") center/cover no-repeat fixed;
+  color: #E0E0E0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
 
     @keyframes waveOcean {
-      <!-- 0%   { background-position: 0% 0%; }
-      25%  { background-position: 100% 0%; }
-      50%  { background-position: 100% 100%; }
-      75%  { background-position: 0% 100%; }
-      100% { background-position: 0% 0%; } -->
-      background-color: #fff4ef; /* very light orange */
+      background-color: #fff4ef;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
@@ -45,9 +37,25 @@
       max-width: 95vw;
     }
 
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 25px;
+      margin-bottom: 15px;
+    }
+
+    .title-row img {
+      height: 108px; /* 36 × 3 */
+      width: auto;
+    }
+
     h1 {
-      font-size: 25px;
+      font-size: 36px;
       text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+      margin: 0;
+      padding: 0;
+      white-space: nowrap;
     }
 
     input {
@@ -105,21 +113,13 @@
     }
 
     .notification.error {
-      background-color: #ef4444; /* Bright red */
+      background-color: #ef4444;
       color: #fff;
-      padding: 12px 20px;
-      border-radius: 8px;
-      margin: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
 
     .notification.warning {
-      background-color: #facc15; /* Vibrant yellow */
-      color: #7a1d0f; /* Dark text for contrast */
-      padding: 12px 20px;
-      border-radius: 8px;
-      margin: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      background-color: #facc15;
+      color: #7a1d0f;
     }
 
     .shake {
@@ -134,19 +134,24 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
-    <h1 style="font-size: 36px;">Response Threshold Calculator</h1>
+
+<div class="title-row" style="flex-direction: column; gap: 10px;">
+  <img src="shop.png" style="height: 90px; width: auto;">
+  <h1>Response Threshold Calculator</h1>
+</div>
+
     <p>Enter time in format: HH:MM:SS to HH:MM:SS</p>
     <input type="text" id="timeRange" placeholder="e.g., 10:53:20 to 10:55:43" />
     <div id="result"></div>
   </div>
 
-  <!-- General notification -->
   <div id="notification" class="notification"></div>
 
   <script>
-    let lastInput = ""; // store last input
+    let lastInput = "";
 
     function parseTimeString(timeStr) {
       const [h, m, s] = timeStr.split(':').map(Number);
@@ -166,15 +171,10 @@
     function showNotification(message, type = "success") {
       const note = document.getElementById("notification");
       note.textContent = message;
-      note.className = "notification"; // reset
+      note.className = "notification";
 
-      if (type === "error") {
-        note.classList.add("error");
-      } else if (type === "warning") {
-        note.classList.add("warning");
-      } else {
-        // success stays green
-      }
+      if (type === "error") note.classList.add("error");
+      else if (type === "warning") note.classList.add("warning");
 
       note.classList.add("show");
       note.style.opacity = "1";
@@ -211,7 +211,6 @@
       if (event.key === 'Enter') {
         const input = this.value.trim();
 
-        // check duplicate entry
         if (input === lastInput) {
           showNotification("Notice! Same result found. Enter a new response threshold format.", "warning");
           return;
@@ -219,7 +218,11 @@
 
         const parts = input.split(' to ').map(p => p.trim());
 
-        if (parts.length !== 2 || !/^\d{2}:\d{2}:\d{2}$/.test(parts[0]) || !/^\d{2}:\d{2}:\d{2}$/.test(parts[1])) {
+        if (
+          parts.length !== 2 ||
+          !/^\d{2}:\d{2}:\d{2}$/.test(parts[0]) ||
+          !/^\d{2}:\d{2}:\d{2}$/.test(parts[1])
+        ) {
           document.getElementById('result').innerText = "⚠️Invalid response threshold format!";
           inputBox.classList.add('shake');
           setTimeout(() => inputBox.classList.remove('shake'), 400);
@@ -234,6 +237,7 @@
 
         const resultText = formatTimeDiff(diff);
         const color = diff <= 150 ? "green" : "red";
+
         document.getElementById('result').innerHTML = `
           <div style='margin-bottom: 10px; font-size: 30px; color: ${color}; text-align: center; font-family: arial; font-weight: bold;'>${resultText}</div>
           <div>
@@ -244,10 +248,10 @@
             <p>Response threshold/GBE10 - The agent also failed the 2-min response threshold from ${parts[0]} until chat ended (due to timeout/agent inactivity) on ${parts[1]} (${resultText}).</p>
             <p>Hold SOP/GBE08 - The agent failed to get back to the user within 2-min response threshold from ${parts[0]} to ${parts[1]} (${resultText}) after placing the chat on hold.</p>
           </div>`;
-        
+
         addCopyButtons();
         showNotification("Success! The response threshold result is now available!");
-        lastInput = input; // update last input
+        lastInput = input;
       }
     });
   </script>
