@@ -5,7 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Response Threshold Calculator</title>
   <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/50/000000/calculator.png">
-  <style>
+
+<style>
+
+/* Prevent scrolling */
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   background: url("christmas.png") center/cover no-repeat fixed;
   color: #E0E0E0;
@@ -18,227 +27,227 @@ body {
   padding: 0;
 }
 
-    @keyframes waveOcean {
-      background-color: #fff4ef;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    }
+/* Center container always */
+.container {
+  background: rgba(17, 24, 39, 0.85);
+  backdrop-filter: blur(5px);
+  padding: 30px 40px;
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  display: inline-block;
+  white-space: nowrap;
+  max-width: 95vw;
+  position: relative;
+  z-index: 10;
+}
 
-    .container {
-      background: rgba(17, 24, 39, 0.85);
-      backdrop-filter: blur(5px);
-      padding: 30px 40px;
-      border-radius: 20px;
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
-      text-align: center;
-      display: inline-block;
-      white-space: nowrap;
-      max-width: 95vw;
-    }
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  margin-bottom: 15px;
+}
 
-    .title-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 25px;
-      margin-bottom: 15px;
-    }
+.title-row img {
+  height: 90px;
+  width: auto;
+}
 
-    .title-row img {
-      height: 108px; /* 36 × 3 */
-      width: auto;
-    }
+h1 {
+  font-size: 36px;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
 
-    h1 {
-      font-size: 36px;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-      margin: 0;
-      padding: 0;
-      white-space: nowrap;
-    }
+input {
+  text-align: center;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  background-color: #374151;
+  color: #ffffff;
+}
 
-    input {
-      text-align: center;
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: none;
-      font-size: 15px;
-      background-color: #374151;
-      color: #ffffff;
-    }
+#result {
+  margin-top: 20px;
+  font-size: clamp(10px, 1.2vw, 14px);
+  color: #A5F3FC;
+  text-align: left;
+  line-height: 1.5;
+}
 
-    #result {
-      margin-top: 20px;
-      font-size: clamp(10px, 1.2vw, 14px);
-      color: #A5F3FC;
-      text-align: left;
-      line-height: 1.5;
-    }
+/* Notification — always bottom center */
+.notification {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #22c55e;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  z-index: 999999 !important;
+  white-space: nowrap;
+}
 
-    .copy-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      margin-right: 8px;
-      font-size: 16px;
-      color: #38bdf8;
-    }
+.notification.show {
+  opacity: 1;
+}
 
-    .copy-btn:hover {
-      color: #0ea5e9;
-    }
+.notification.error {
+  background-color: #ef4444;
+}
 
-    .notification {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #22c55e;
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 16px;
-      opacity: 0;
-      transition: opacity 0.5s ease-in-out;
-      z-index: 1000;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-      margin: 10px;
-    }
+.notification.warning {
+  background-color: #facc15;
+  color: #7a1d0f;
+}
 
-    .notification.show {
-      opacity: 1;
-    }
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: 8px;
+  font-size: 20px;
+  color: #38bdf8;
+}
 
-    .notification.error {
-      background-color: #ef4444;
-      color: #fff;
-    }
+.copy-btn:hover {
+  color: #0ea5e9;
+}
 
-    .notification.warning {
-      background-color: #facc15;
-      color: #7a1d0f;
-    }
+/* Shake on invalid */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+}
 
-    .shake {
-      animation: shake 0.4s ease-in-out;
-    }
+.shake {
+  animation: shake 0.4s ease-in-out;
+}
 
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      50% { transform: translateX(5px); }
-      75% { transform: translateX(-5px); }
-    }
-  </style>
+/* Snow canvas */
+#snowCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+</style>
 </head>
 
 <body>
-  <div class="container">
 
+<canvas id="snowCanvas"></canvas>
+
+<div class="container">
 <div class="title-row" style="flex-direction: column; gap: 10px;">
-  <img src="shop.png" style="height: 90px; width: auto;">
+  <img src="shop.png">
   <h1>Response Threshold Calculator</h1>
 </div>
 
-    <p>Enter time in format: HH:MM:SS to HH:MM:SS</p>
-    <input type="text" id="timeRange" placeholder="e.g., 10:53:20 to 10:55:43" />
-    <div id="result"></div>
-  </div>
+<p>Enter time in format: HH:MM:SS to HH:MM:SS</p>
+<input type="text" id="timeRange" placeholder="e.g., 10:53:20 to 10:55:43" />
+<div id="result"></div>
+</div>
 
-  <div id="notification" class="notification"></div>
+<!-- SINGLE Notification element (centered) -->
+<div id="notification" class="notification"></div>
 
-  <script>
-    let lastInput = "";
+<script>
+let lastInput = "";
 
-    function parseTimeString(timeStr) {
-      const [h, m, s] = timeStr.split(':').map(Number);
-      return (h * 3600) + (m * 60) + s;
+function parseTimeString(timeStr) {
+  const [h, m, s] = timeStr.split(':').map(Number);
+  return (h * 3600) + (m * 60) + s;
+}
+
+function formatTimeDiff(seconds) {
+  if (seconds <= 0) return "0sec";
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  let result = "";
+  if (mins > 0) result += `${mins}min${mins > 1 ? 's' : ''}`;
+  if (secs > 0) result += (mins > 0 ? ' and ' : '') + `${secs}sec${secs > 1 ? 's' : ''}`;
+  return result;
+}
+
+function showNotification(message, type = "success") {
+  const note = document.getElementById("notification");
+  note.className = "notification";
+  note.textContent = message;
+
+  if (type === "error") note.classList.add("error");
+  if (type === "warning") note.classList.add("warning");
+
+  note.classList.add("show");
+
+  setTimeout(() => {
+    note.classList.remove("show");
+  }, 4000);
+}
+
+function addCopyButtons() {
+  const resultDiv = document.getElementById("result");
+  const paragraphs = resultDiv.querySelectorAll("p");
+  paragraphs.forEach(p => {
+    if (!p.querySelector("button")) {
+      const text = p.innerText;
+      const btn = document.createElement("button");
+      btn.innerHTML = "📋";
+      btn.className = "copy-btn";
+      btn.onclick = () => {
+        navigator.clipboard.writeText(text).then(() => {
+          showNotification("Copied!");
+        });
+      };
+      p.prepend(btn);
+    }
+  });
+}
+
+document.getElementById('timeRange').addEventListener('keydown', function(event) {
+  const inputBox = this;
+  if (event.key === 'Enter') {
+    const input = this.value.trim();
+
+    if (input === lastInput) {
+      showNotification("Same result found. Enter a new timestamp.", "warning");
+      return;
     }
 
-    function formatTimeDiff(seconds) {
-      if (seconds <= 0) return "0sec";
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      let result = "";
-      if (mins > 0) result += `${mins}min${mins > 1 ? 's' : ''}`;
-      if (secs > 0) result += (mins > 0 ? ' and ' : '') + `${secs}sec${secs > 1 ? 's' : ''}`;
-      return result;
+    const parts = input.split(' to ').map(p => p.trim());
+    if (
+      parts.length !== 2 ||
+      !/^\d{2}:\d{2}:\d{2}$/.test(parts[0]) ||
+      !/^\d{2}:\d{2}:\d{2}$/.test(parts[1])
+    ) {
+      document.getElementById('result').innerText = "⚠️Invalid response threshold format!";
+      inputBox.classList.add('shake');
+      setTimeout(() => inputBox.classList.remove('shake'), 400);
+      showNotification("Failed! Check HH:MM:SS to HH:MM:SS format", "error");
+      return;
     }
 
-    function showNotification(message, type = "success") {
-      const note = document.getElementById("notification");
-      note.textContent = message;
-      note.className = "notification";
+    const diff = (parseTimeString(parts[1]) - parseTimeString(parts[0]) + 86400) % 86400;
+    const resultText = formatTimeDiff(diff);
+    const color = diff <= 150 ? "green" : "red";
 
-      if (type === "error") note.classList.add("error");
-      else if (type === "warning") note.classList.add("warning");
-
-      note.classList.add("show");
-      note.style.opacity = "1";
-
-      setTimeout(() => {
-        note.style.opacity = "0";
-        setTimeout(() => note.classList.remove("show"), 5000);
-      }, 5000);
-    }
-
-    function addCopyButtons() {
-      const resultDiv = document.getElementById("result");
-      const paragraphs = resultDiv.querySelectorAll("p");
-
-      paragraphs.forEach(p => {
-        if (!p.querySelector("button")) {
-          const text = p.innerText;
-          const btn = document.createElement("button");
-          btn.innerHTML = "📋";
-          btn.style.fontSize = "25px";
-          btn.className = "copy-btn";
-          btn.onclick = () => {
-            navigator.clipboard.writeText(text).then(() => {
-              showNotification("Success!");
-            });
-          };
-          p.prepend(btn);
-        }
-      });
-    }
-
-    document.getElementById('timeRange').addEventListener('keydown', function(event) {
-      const inputBox = this;
-      if (event.key === 'Enter') {
-        const input = this.value.trim();
-
-        if (input === lastInput) {
-          showNotification("Notice! Same result found. Enter a new response threshold format.", "warning");
-          return;
-        }
-
-        const parts = input.split(' to ').map(p => p.trim());
-
-        if (
-          parts.length !== 2 ||
-          !/^\d{2}:\d{2}:\d{2}$/.test(parts[0]) ||
-          !/^\d{2}:\d{2}:\d{2}$/.test(parts[1])
-        ) {
-          document.getElementById('result').innerText = "⚠️Invalid response threshold format!";
-          inputBox.classList.add('shake');
-          setTimeout(() => inputBox.classList.remove('shake'), 400);
-          showNotification("Failed! Check the correct format (HH:MM:SS to HH:MM:SS).", "error");
-          return;
-        }
-
-        const fromSec = parseTimeString(parts[0]);
-        const toSec = parseTimeString(parts[1]);
-        let diff = toSec - fromSec;
-        if (diff < 0) diff += 86400;
-
-        const resultText = formatTimeDiff(diff);
-        const color = diff <= 150 ? "green" : "red";
-
-        document.getElementById('result').innerHTML = `
+    document.getElementById('result').innerHTML = `
           <div style='margin-bottom: 10px; font-size: 30px; color: ${color}; text-align: center; font-family: arial; font-weight: bold;'>${resultText}</div>
           <div>
             <p>Response threshold/GBE10 - The agent failed the 15-sec response threshold from ${parts[0]} to ${parts[1]} (${resultText}).</p>
@@ -249,11 +258,52 @@ body {
             <p>Hold SOP/GBE08 - The agent failed to get back to the user within 2-min response threshold from ${parts[0]} to ${parts[1]} (${resultText}) after placing the chat on hold.</p>
           </div>`;
 
-        addCopyButtons();
-        showNotification("Success! The response threshold result is now available!");
-        lastInput = input;
-      }
-    });
-  </script>
+    addCopyButtons();
+    showNotification("Success!");
+    lastInput = input;
+  }
+});
+</script>
+
+<script>
+// Snow animation
+const canvas = document.getElementById("snowCanvas");
+const ctx = canvas.getContext("2d");
+let w, h;
+let snowflakes = [];
+
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+function newSnowflake() {
+  return {
+    x: Math.random() * w,
+    y: Math.random() * -50,
+    r: Math.random() * 3 + 2,
+    s: Math.random() * 1 + 2,
+  };
+}
+
+function updateSnow() {
+  ctx.clearRect(0, 0, w, h);
+  if (snowflakes.length < 200) snowflakes.push(newSnowflake());
+
+  snowflakes.forEach((f, i) => {
+    f.y += f.s;
+    if (f.y > h) snowflakes[i] = newSnowflake();
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+  });
+  requestAnimationFrame(updateSnow);
+}
+updateSnow();
+</script>
+
 </body>
 </html>
