@@ -8,6 +8,44 @@
 
 <style>
 
+/* ---- STAR SNOWFLAKES ---- */
+.star-snow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.star-snow span {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border-radius: 50%;
+  display: block;
+  opacity: 0.8;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='white'><path d='M12 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z'/></svg>");
+  background-size: contain;
+  animation: starFall linear infinite;
+}
+
+@keyframes starFall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 0;
+  }
+  20% { opacity: 1; }
+  100% {
+    transform: translateY(110vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+
 /* Prevent scrolling */
 html, body {
   width: 100%;
@@ -151,9 +189,8 @@ input {
 </head>
 
 <body>
-
 <canvas id="snowCanvas"></canvas>
-
+<div class="star-snow" id="starSnow"></div>
 <div class="container">
 <div class="title-row" style="flex-direction: column; gap: 10px;">
   <img src="shop.png">
@@ -283,8 +320,8 @@ function newSnowflake() {
   return {
     x: Math.random() * w,
     y: Math.random() * -70,
-    r: Math.random() * 4 + 4,
-    s: Math.random() * 2 + 4,
+    r: Math.random() * 4 + 2,
+    s: Math.random() * 4 + 2,
   };
 }
 
@@ -305,5 +342,40 @@ function updateSnow() {
 updateSnow();
 </script>
 
+<script>
+function createStarSnowflakes() {
+  const container = document.getElementById("starSnow");
+  const count = 200; // number of flakes
+
+  for (let i = 0; i < count; i++) {
+    const flake = document.createElement("span");
+
+    flake.style.left = Math.random() * 100 + "vw";
+    flake.style.animationDuration = 5 + Math.random() * 6 + "s";
+    flake.style.animationDelay = Math.random() * 5 + "s";
+    flake.style.opacity = 0.5 + Math.random() * 0.5;
+    flake.style.transform = `scale(${0.3 + Math.random() * 0.8})`;
+
+    container.appendChild(flake);
+  }
+}
+createStarSnowflakes();
+
+</script>
+
+<script>
+
+const starSnowLayer = document.getElementById("starSnow");
+
+document.addEventListener("mousemove", (e) => {
+  const x = (e.clientX / window.innerWidth - 3) * 30;  // left/right shift
+  const y = (e.clientY / window.innerHeight - 3) * 30; // up/down shift
+
+  starSnowLayer.style.transform = `translate(${x}px, ${y}px)`;
+});
+</script>
+
+
 </body>
 </html>
+
