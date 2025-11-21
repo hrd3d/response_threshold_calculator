@@ -345,7 +345,7 @@ updateSnow();
 <script>
 function createStarSnowflakes() {
   const container = document.getElementById("starSnow");
-  const count = 200; // number of flakes
+  const count = 150; // number of flakes
 
   for (let i = 0; i < count; i++) {
     const flake = document.createElement("span");
@@ -364,17 +364,34 @@ createStarSnowflakes();
 </script>
 
 <script>
-
 const starSnowLayer = document.getElementById("starSnow");
+let centerX = window.innerWidth / 2;
+let centerY = window.innerHeight / 2;
+
+// Maximum 3D rotation angles
+const maxRotateY = 35; // side-to-side
+const maxRotateX = 15; // slight up-down tilt
+
+// Sensitivity factor (smaller = slower)
+const sensitivity = 0.2;
 
 document.addEventListener("mousemove", (e) => {
-  const x = (e.clientX / window.innerWidth - 3) * 30;  // left/right shift
-  const y = (e.clientY / window.innerHeight - 3) * 30; // up/down shift
+  const dx = e.clientX - centerX;
+  const dy = e.clientY - centerY;
 
-  starSnowLayer.style.transform = `translate(${x}px, ${y}px)`;
+  // Calculate rotation angles with slow response
+  const rotateY = dx / centerX * maxRotateY * sensitivity;
+  const rotateX = -dy / centerY * maxRotateX * sensitivity;
+
+  // Apply 3D transform with perspective
+  starSnowLayer.style.transform = `perspective(800px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+});
+
+window.addEventListener("resize", () => {
+  centerX = window.innerWidth / 2;
+  centerY = window.innerHeight / 2;
 });
 </script>
-
 
 </body>
 </html>
